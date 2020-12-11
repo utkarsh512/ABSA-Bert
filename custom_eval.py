@@ -68,13 +68,22 @@ def main():
   y_pred, score = get_y_pred(args.path)
 
   # Normalizing score for ROC-AUC score
-  for i in range(len(score)):
-    s = 0
-    for j in range(len(score[0])):
-      s += score[i][j]
-    for j in range(len(score[0])):
-      score[i][j] /= s
-
+  if args.task_name[-1] == 'M':
+    for i in range(len(score)):
+      s = 0
+      for j in range(len(score[0])):
+        s += score[i][j]
+      for j in range(len(score[0])):
+        score[i][j] /= s
+    score = np.array([np.array(xi) for xi in score])
+  else:
+    new_score = []
+    for i in range(len(score)):
+      neg, pos = score[i][0], score[i][1]
+      tot = neg + pos
+      pos /= tot
+      new_score.append(pos)
+    score = np.array(new_score)
   y_true = np.array(y_true)
   y_pred = np.array(y_pred)
   score = np.array([np.array(xi) for xi in score])
@@ -86,8 +95,12 @@ def main():
   result['recall_weighted'] = metrics.recall_score(y_true, y_pred, average='weighted')
   result['f1_macro'] = metrics.f1_score(y_true, y_pred, average='macro')
   result['f1_weighted'] = metrics.f1_score(y_true, y_pred, average='weighted')
-  result['auc_score_macro'] = metrics.roc_auc_score(y_true, score, average='macro', multi_class='ovo')
-  result['auc_score_weighted'] = metrics.roc_auc_score(y_true, score, average='weighted', multi_class='ovo')
+  if args.task_name[-1] == 'M':
+    result['auc_score_macro'] = metrics.roc_auc_score(y_true, score, average='macro', multi_class='ovo')
+    result['auc_score_weighted'] = metrics.roc_auc_score(y_true, score, average='weighted', multi_class='ovo')
+  else:
+    result['auc_score_macro'] = metrics.roc_auc_score(y_true, score)
+    result['auc_score_weighted'] = metrics.roc_auc_score(y_true, score)
   print('Results')
   print('-' * 20)
   for key in result.keys():
