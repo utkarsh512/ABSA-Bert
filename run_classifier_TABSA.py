@@ -17,6 +17,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data.sampler import RandomSampler, SequentialSampler
 from tqdm import tqdm, trange
+from apex import amp
 
 import tokenization
 from modeling import BertConfig, BertForSequenceClassification
@@ -182,6 +183,7 @@ def main():
                         help="The output directory where the model checkpoints will be written.")
     
     ## Other parameters
+    parser.add_argument("--fp16", default=0, type=int, help="Carrying out fp16 training")
     parser.add_argument("--init_checkpoint",
                         default=None,
                         type=str,
@@ -371,6 +373,9 @@ def main():
                          lr=args.learning_rate,
                          warmup=args.warmup_proportion,
                          t_total=num_train_steps)
+    
+    if args.fp16:
+        model, optimizer = amp.initialize(model, optimizer, opt_level='O3')
 
 
     # train
@@ -384,6 +389,7 @@ def main():
     
     global_step = 0
     epoch = 0
+		
     for _ in trange(int(args.num_train_epochs), desc="Epoch"):
         epoch += 1
         model.train()
@@ -397,7 +403,11 @@ def main():
                 loss = loss.mean() # mean() to average on multi-gpu.
             if args.gradient_accumulation_steps > 1:
                 loss = loss / args.gradient_accumulation_steps
-            loss.backward()
+            if args.fp16:
+                with amp.scale_loss(loss, optimizer) as sacled_loss:
+                    scaled_loss.backward()
+            else:
+				loss.backward()
             tr_loss += loss.item()
             nb_tr_examples += input_ids.size(0)
             nb_tr_steps += 1
