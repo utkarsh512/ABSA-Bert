@@ -4,8 +4,8 @@ import os
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument('--train', default=0.7, type=float, required=True, help='Ratio of train set wrt original dataset')
-  parser.add_argument('--dev', default=0.1, type=float, required=True, help='Ratio of dev set wrt original dataset')
+  parser.add_argument('--train', default=0.7, type=float, required=False, help='Ratio of train set wrt original dataset')
+  parser.add_argument('--dev', default=0.1, type=float, required=False, help='Ratio of dev set wrt original dataset')
   args = parser.parse_args()
 
   path = 'data/sentihood/bert-pair/'
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     train_df = train_df.reset_index(drop=True)
     dev_df = dev_df.reset_index(drop=True)
     test_df = test_df.reset_index(drop=True)
-    print('Model {4} - Length of datasets: Whole {0}, train {1}, dev {2} and test {3}'.format(len(df), len(train_df). len(dev_df), len(test_df), model))
+    print('Model {4} - Length of datasets: Whole {0}, train {1}, dev {2} and test {3}'.format(len(df), len(train_df), len(dev_df), len(test_df), model))
     train_df.to_csv(train_path, sep='\t', index=False)
     dev_df.to_csv(dev_path, sep='\t', index=False)
     test_df.to_csv(test_path, sep='\t', index=False)
