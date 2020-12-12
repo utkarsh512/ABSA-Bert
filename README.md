@@ -8,9 +8,9 @@ Run this command to install necessary file required for training the models (for
 $ bash make_env.sh
 ```
 ### Step 2: Shuffling Dataset and preparing train, dev and test sets
-Dataset is shuffled and partitioned into train, dev and test sets. For partitioning, arguments are passed denoting the train and dev ratio.
+Dataset is shuffled and partitioned into train, dev and test sets. For partitioning, arguments are passed denoting the train and dev ratio. It is guarantted that sentence pairs generated from a particular sentence from the original dataset (which are provided as `JSON` files) occurs in only one of the partition.
 ```
-$ python random_shuffle.py --train 0.7 --dev 0.1
+$ python partition.py --train 0.7 --dev 0.1
 ```
 ### Step 3: Training the model
 If you want to train __QA_M__ model on the dataset with maximum allowed sequence length of 100 characters and batch size of 32, this can be done as
