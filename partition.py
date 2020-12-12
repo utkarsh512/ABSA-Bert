@@ -22,18 +22,20 @@ if __name__ == '__main__':
     dev_df = pd.read_csv(dev_path, sep='\t')
     test_df = pd.read_csv(test_path, sep='\t')
     os.system('rm -fv {0} {1} {2}'.format(train_path, dev_path, test_path))
-    df = pd.concat([train_df, dev_df, test_df])
-    df = df.sample(frac=1)
+    df = pd.concat([test_df, dev_df, train_df])
     df = df.reset_index(drop=True)
     LEN = len(df)
-    A = int(TRAIN * LEN)
-    B = int((TRAIN + DEV) * LEN)
+    Z = 4 if model[-1] == 'M' else 12
+    LEN = LEN // Z
+    A = int(TRAIN * LEN) * Z
+    B = int((TRAIN + DEV) * LEN) * Z
     train_df = df[: A]
     dev_df = df[A : B]
     test_df = df[B :]
     train_df = train_df.reset_index(drop=True)
     dev_df = dev_df.reset_index(drop=True)
     test_df = test_df.reset_index(drop=True)
+    print('Model {4} - Length of datasets: Whole {0}, train {1}, dev {2} and test {3}'.format(len(df), len(train_df). len(dev_df), len(test_df), model))
     train_df.to_csv(train_path, sep='\t', index=False)
     dev_df.to_csv(dev_path, sep='\t', index=False)
     test_df.to_csv(test_path, sep='\t', index=False)
