@@ -183,7 +183,10 @@ def main():
                         help="The output directory where the model checkpoints will be written.")
     
     ## Other parameters
-    parser.add_argument("--fp16", default=0, type=int, help="Carrying out fp16 training")
+    parser.add_argument("--amp",
+			default=0,
+			type=int,
+			help="Carrying out Automatic Mixed Precision training")
     parser.add_argument("--init_checkpoint",
                         default=None,
                         type=str,
@@ -357,12 +360,6 @@ def main():
         model.bert.load_state_dict(torch.load(args.init_checkpoint, map_location='cpu'))
     model.to(device)
 
-    if args.local_rank != -1:
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank],
-                                                          output_device=args.local_rank)
-    elif n_gpu > 1:
-        model = torch.nn.DataParallel(model)
-
     no_decay = ['bias', 'gamma', 'beta']
     optimizer_parameters = [
          {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01},
@@ -374,10 +371,14 @@ def main():
                          warmup=args.warmup_proportion,
                          t_total=num_train_steps)
     
-    if args.fp16:
-        model, optimizer = amp.initialize(model, optimizer, opt_level='O3')
+    if args.amp:
+        model, optimizer = amp.initialize(model, optimizer, opt_level='O1')
 
-
+    if args.local_rank != -1:
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank],
+                                                          output_device=args.local_rank)
+    elif n_gpu > 1:
+        model = torch.nn.DataParallel(model)
     # train
     output_log_file = os.path.join(args.output_dir, "log.txt")
     print("output_log_file=",output_log_file)
@@ -403,11 +404,11 @@ def main():
                 loss = loss.mean() # mean() to average on multi-gpu.
             if args.gradient_accumulation_steps > 1:
                 loss = loss / args.gradient_accumulation_steps
-            if args.fp16:
+            if args.amp:
                 with amp.scale_loss(loss, optimizer) as sacled_loss:
                     scaled_loss.backward()
             else:
-				loss.backward()
+		loss.backward()
             tr_loss += loss.item()
             nb_tr_examples += input_ids.size(0)
             nb_tr_steps += 1
