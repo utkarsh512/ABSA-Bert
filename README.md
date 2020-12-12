@@ -15,10 +15,11 @@ $ python partition.py --train 0.7 --dev 0.1
 ### Step 3: Training the model
 If you want to train __QA_M__ model on the dataset with maximum allowed sequence length of 100 characters and batch size of 32, this can be done as
 ```
-$ bash train.sh QA_M 100 32
+$ bash train.sh QA_M 100 32 1
 ```
+Last argument should be `1` if you want to use [AMP](https://github.com/NVIDIA/apex) while training, otherwise it should be zero.
 ### Step 4: Evaluating performance of the model
 Suppose, we have trained __QA_M__ model. To evaluate its performance, we need the path to directory where results of last epoch was saved while training. Generally, this directory is available at `result/sentihood/{model}/test_ep_{T}.txt` where `T` is the number of epoch used while training and `model` is the name of the model.
 ```
-$ python evaluation.py --task_name sentihood_QA_M --pred_dir result/sentihood/QA_M/test_ep_6.txt
+$ python evaluation.py --task_name sentihood_QA_M --pred_data_dir result/sentihood/QA_M/test_ep_6.txt
 ```
