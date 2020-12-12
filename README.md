@@ -1,5 +1,5 @@
 # Aspect-based Sentiment Analysis using BERT
-The README of original repo is available [here](https://github.com/HSLCY/ABSA-BERT-pair/blob/master/README.md). In this project, our approach is to perform aspect-based sentiment analysis via constructing auxilary sentences using BERT.
+This repo is the extended version of the original project. The README of original repo is available [here](https://github.com/HSLCY/ABSA-BERT-pair/blob/master/README.md). In this project, our approach is to perform aspect-based sentiment analysis via constructing auxilary sentences using BERT.
 ## How to use this repo
 Four different models are used for this task. They are __QA_M__, __QA_B__, __NLI_M__ and __NLI_B__. Their description can be found in the paper. Training and testing using this repo can be done by following these steps:
 ### Step 1: Preparing environment for BERT fine-tuning
